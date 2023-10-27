@@ -2,17 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
 	"os"
 
 	"github.com/kolesa-team/go-webp/encoder"
 	"github.com/kolesa-team/go-webp/webp"
 )
 
-// Note to self: We need to manually install webp
 func main() {
 	inputFilePathFlag := flag.String("i", "", "Input file path")
 	outputFilePathFlag := flag.String("o", "", "Output file path")
@@ -21,37 +20,44 @@ func main() {
 	flag.Parse()
 
 	if *inputFilePathFlag == "" {
-		log.Fatalln("Please supply an input image path!")
+		fmt.Println("Please supply an input image path!")
+		os.Exit(1)
 	}
 
 	if *outputFilePathFlag == "" {
-		log.Fatalln("Please supply an output image path!")
+		fmt.Println("Please supply an output image path!")
+		os.Exit(1)
 	}
 
 	file, err := os.Open(*inputFilePathFlag)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	output, err := os.Create(*outputFilePathFlag)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer output.Close()
 
 	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, float32(*qualityFlag))
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	if err := webp.Encode(output, img, options); err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	log.Printf("Created %s successfully", *outputFilePathFlag)
+	fmt.Printf("Created %s successfully\n", *outputFilePathFlag)
 }
